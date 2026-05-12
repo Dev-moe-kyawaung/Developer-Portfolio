@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev-moe-kyawaung | WPA Collection · Ultra Pro Max</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;600;700;900&family=Exo+2:ital,wght@0,100;0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════ TOKENS */
+:root {
+  --c0: #020509;
+  --c1: #040d1a;
+  --c2: #061226;
+  --cyan:    #00ffe7;
+  --cyan2:   #00c8b8;
+  --pink:    #ff2d78;
+  --gold:    #ffd700;
+  --azure:   #0078d4;
+  --azure2:  #00a4ef;
+  --gg-b:    #4285f4;
+  --gg-r:    #ea4335;
+  --gg-y:    #fbbc05;
+  --gg-g:    #34a853;
+  --ms-r:    #f25022;
+  --ms-g:    #7fba00;
+  --ms-b:    #00a4ef;
+  --ms-y:    #ffb900;
+  --border:  rgba(0,255,231,0.14);
+  --panel:   rgba(4,18,38,0.82);
+  --glow-c:  0 0 30px rgba(0,255,231,0.25);
+  --glow-p:  0 0 30px rgba(255,45,120,0.25);
+  --glow-g:  0 0 30px rgba(255,215,0,0.2);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--c0);
+  color: #b8cfe0;
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ═══ CUSTOM CURSOR */
+#cursor {
+  position: fixed; z-index: 9999; pointer-events: none;
+  width: 12px; height: 12px;
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--cyan), 0 0 30px rgba(0,255,231,0.4);
+  transform: translate(-50%,-50%);
+  transition: transform 0.05s;
+  mix-blend-mode: screen;
+}
+#cursor-ring {
+  position: fixed; z-index: 9998; pointer-events: none;
+  width: 36px; height: 36px;
+  border: 1px solid rgba(0,255,231,0.5);
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  transition: all 0.15s ease;
+}
+
+/* ═══ MATRIX CANVAS */
+#matrix-bg {
+  position: fixed; top: 0; left: 0; z-index: 0;
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+/* ═══ GRID OVERLAY */
+.grid-overlay {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    linear-gradient(rgba(0,255,231,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,231,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ═══ SCANLINES */
+.scanlines {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+  );
+}
+
+/* ═══ LOADING SCREEN */
+#loader {
+  position: fixed; inset: 0; z-index: 9000;
+  background: var(--c0);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 20px;
+  transition: opacity 0.7s, visibility 0.7s;
+}
+#loader.hidden { opacity: 0; visibility: hidden; }
+
+.loader-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: var(--cyan);
+  text-shadow: 0 0 20px var(--cyan);
+  animation: flicker 2s infinite;
+}
+.loader-bar-wrap {
+  width: 240px; height: 2px;
+  background: rgba(0,255,231,0.1);
+  border-radius: 2px; overflow: hidden;
+}
+.loader-bar {
+  height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--cyan), var(--pink));
+  box-shadow: 0 0 12px var(--cyan);
+  animation: load-fill 1.8s ease forwards;
+}
+@keyframes load-fill { to { width: 100%; } }
+.loader-pct {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 3px; color: rgba(0,255,231,0.5);
+}
+@keyframes flicker {
+  0%,95%,100% { opacity: 1; }
+  96%,99% { opacity: 0.3; }
+}
+
+/* ═══ WRAPPER */
+.page { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 0 28px; }
+
+/* ═══ HERO */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  text-align: center;
+  padding: 60px 0 40px;
+  position: relative;
+}
+
+.hero-orbit {
+  position: absolute;
+  border: 1px solid rgba(0,255,231,0.07);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero-orbit:nth-child(1) { width: 500px; height: 500px; animation: spin 40s linear infinite; }
+.hero-orbit:nth-child(2) { width: 700px; height: 700px; animation: spin 60s linear infinite reverse; }
+.hero-orbit:nth-child(3) { width: 900px; height: 900px; animation: spin 80s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.corp-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; margin-bottom: 32px; flex-wrap: wrap;
+}
+
+.corp-pill {
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  padding: 8px 20px; border-radius: 40px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 3px;
+  backdrop-filter: blur(10px);
+  transition: border-color .3s, box-shadow .3s;
+}
+.corp-pill:hover { border-color: var(--cyan); box-shadow: var(--glow-c); }
+
+.ms-logo { display:grid; grid-template-columns:1fr 1fr; gap:2px; width:16px; height:16px; }
+.ms-logo span { border-radius:1px; display:block; }
+.ms-logo span:nth-child(1){ background:var(--ms-r); }
+.ms-logo span:nth-child(2){ background:var(--ms-g); }
+.ms-logo span:nth-child(3){ background:var(--ms-b); }
+.ms-logo span:nth-child(4){ background:var(--ms-y); }
+
+.gg-logo { display:flex; gap:2px; }
+.gg-logo span { width:5px;height:5px;border-radius:50%;display:block; }
+.gg-logo span:nth-child(1){background:var(--gg-b);}
+.gg-logo span:nth-child(2){background:var(--gg-r);}
+.gg-logo span:nth-child(3){background:var(--gg-y);}
+.gg-logo span:nth-child(4){background:var(--gg-g);}
+
+.hero-eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 5px;
+  color: rgba(0,255,231,0.5);
+  text-transform: uppercase; margin-bottom: 14px;
+}
+
+.hero-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(2rem, 7vw, 5.5rem);
+  font-weight: 900; line-height: 1.05;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--cyan) 0%, #fff 40%, var(--pink) 80%, var(--gold) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+  animation: title-glow 4s ease-in-out infinite alternate;
+}
+@keyframes title-glow {
+  from { filter: drop-shadow(0 0 20px rgba(0,255,231,0.3)); }
+  to   { filter: drop-shadow(0 0 40px rgba(255,45,120,0.3)); }
+}
+
+.hero-myanmar {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  color: rgba(0,255,231,0.55);
+  letter-spacing: 6px;
+  margin-bottom: 8px;
+}
+
+.hero-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem; letter-spacing: 4px;
+  color: rgba(184,207,224,0.4);
+  text-transform: uppercase; margin-bottom: 36px;
+}
+
+.hero-cta-row {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+
+.btn-cta {
+  padding: 12px 28px;
+  border-radius: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 2px;
+  text-decoration: none; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all .25s;
+  position: relative; overflow: hidden;
+}
+.btn-cta::before {
+  content:''; position:absolute; inset:0;
+  transform: translateX(-100%); transition: transform .35s;
+  opacity: 0.15;
+}
+.btn-cta:hover::before { transform: translateX(0); }
+
+.btn-primary {
+  background: linear-gradient(135deg, rgba(0,255,231,0.15), rgba(0,255,231,0.05));
+  border: 1px solid var(--cyan); color: var(--cyan);
+  box-shadow: var(--glow-c);
+}
+.btn-primary::before { background: var(--cyan); }
+.btn-primary:hover { box-shadow: 0 0 50px rgba(0,255,231,0.4); }
+
+.btn-secondary {
+  background: linear-gradient(135deg, rgba(255,45,120,0.12), rgba(255,45,120,0.04));
+  border: 1px solid var(--pink); color: var(--pink);
+}
+.btn-secondary::before { background: var(--pink); }
+.btn-secondary:hover { box-shadow: var(--glow-p); }
+
+/* hero scroll indicator */
+.scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.scroll-hint span {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem; letter-spacing: 3px; color: rgba(0,255,231,0.3);
+}
+.scroll-arrow {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, var(--cyan), transparent);
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+@keyframes scroll-pulse {
+  0%,100%{opacity:0.3;transform:scaleY(1);}
+  50%{opacity:1;transform:scaleY(1.2);}
+}
+
+/* ═══ STATS BANNER */
+.stats-banner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0 0 64px;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+}
+
+.stat-cell {
+  padding: 24px 20px; text-align: center;
+  border-right: 1px solid var(--border);
+  position: relative; overflow: hidden;
+  transition: background .3s;
+}
+.stat-cell:last-child { border-right: none; }
+.stat-cell:hover { background: rgba(0,255,231,0.04); }
+.stat-cell::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: 0; transition: opacity .3s;
+}
+.stat-cell:hover::after { opacity: 1; }
+
+.stat-num {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem; font-weight: 900;
+  color: var(--cyan);
+  text-shadow: 0 0 20px rgba(0,255,231,0.5);
+  display: block;
+  line-height: 1;
+}
+.stat-lbl {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem; letter-spacing: 2px;
+  color: rgba(184,207,224,0.35);
+  text-transform: uppercase; margin-top: 6px; display: block;
+}
+
+/* ═══ SECTION HEADER */
+.sec-head {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 32px; margin-top: 64px;
+}
+.sec-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border: 1px solid; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.sec-icon.c { border-color: var(--cyan); box-shadow: var(--glow-c); }
+.sec-icon.p { border-color: var(--pink); box-shadow: var(--glow-p); }
+.sec-icon.g { border-color: var(--gold); box-shadow: var(--glow-g); }
+.sec-icon.az { border-color: var(--azure2); box-shadow: 0 0 20px rgba(0,164,239,0.3); }
+
+.sec-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 4px;
+  text-transform: uppercase;
+}
+.sec-label.c { color: var(--cyan); }
+.sec-label.p { color: var(--pink); }
+.sec-label.g { color: var(--gold); }
+.sec-label.az { color: var(--azure2); }
+
+.sec-line { flex:1; height:1px; background: linear-gradient(90deg, var(--border), transparent); }
+
+.sec-count {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem; letter-spacing: 2px;
+  padding: 3px 10px; border-radius: 20px;
+  border: 1px solid var(--border);
+  color: rgba(184,207,224,0.3);
+}
+
+/* ═══ PROJECT GRID */
+.proj-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.proj-grid.featured { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+
+/* ═══ PROJECT CARD */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: border-color .3s, transform .3s, box-shadow .3s;
+  transform-style: preserve-3d;
+}
+
+.card:hover {
+  transform: translateY(-6px) rotateX(1deg);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), var(--glow-c);
+}
+
+/* top accent */
+.card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  transition: opacity .3s;
+}
+.card.ms::before  { background: linear-gradient(90deg,var(--ms-b),var(--ms-g),var(--ms-y),var(--ms-r)); }
+.card.gg::before  { background: linear-gradient(90deg,var(--gg-b),var(--gg-r),var(--gg-y),var(--gg-g)); }
+.card.az::before  { background: linear-gradient(90deg,var(--azure),var(--cyan),var(--azure2)); }
+.card.os::before  { background: linear-gradient(90deg,var(--pink),var(--gold)); }
+.card.dev::before { background: linear-gradient(90deg,var(--cyan),var(--pink)); }
+
+/* corner radiance */
+.card::after {
+  content:''; position:absolute; bottom:-40px; right:-40px;
+  width:120px; height:120px; border-radius:50%;
+  pointer-events:none; opacity:0; transition: opacity .4s;
+}
+.card.ms::after  { background: radial-gradient(circle,rgba(0,120,212,0.2),transparent 70%); }
+.card.gg::after  { background: radial-gradient(circle,rgba(66,133,244,0.2),transparent 70%); }
+.card.az::after  { background: radial-gradient(circle,rgba(0,164,239,0.2),transparent 70%); }
+.card.os::after  { background: radial-gradient(circle,rgba(255,215,0,0.15),transparent 70%); }
+.card.dev::after { background: radial-gradient(circle,rgba(0,255,231,0.15),transparent 70%); }
+.card:hover::after { opacity: 1; }
+.card:hover { border-color: rgba(0,255,231,0.35); }
+
+/* FEATURED card */
+.card.featured-card {
+  background: linear-gradient(145deg, rgba(0,120,212,0.08), rgba(4,18,38,0.9));
+  border-color: rgba(0,164,239,0.3);
+}
+.card.featured-card:hover { border-color: var(--azure2); box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,164,239,0.3); }
+
+.card-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 14px; gap: 10px;
+}
+
+.card-left { display: flex; gap: 12px; align-items: flex-start; flex:1; }
+
+.card-emoji {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.card-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.78rem; font-weight: 700;
+  color: #e8f4ff; letter-spacing: 1px;
+  margin-bottom: 4px; line-height: 1.3;
+}
+
+.card-corp {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem; letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.card-corp.ms  { color: var(--ms-b); }
+.card-corp.gg  { color: var(--gg-b); }
+.card-corp.az  { color: var(--azure2); }
+.card-corp.os  { color: var(--gold); }
+.card-corp.dev { color: var(--cyan); }
+
+/* status pill */
+.status {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem; letter-spacing: 1.5px;
+  text-transform: uppercase; flex-shrink: 0;
+  padding: 3px 9px; border-radius: 20px; border: 1px solid;
+}
+.status.live   { color:#00ff88; border-color:rgba(0,255,136,0.3); background:rgba(0,255,136,0.06); }
+.status.beta   { color:var(--gold); border-color:rgba(255,215,0,0.3); background:rgba(255,215,0,0.06); }
+.status.wip    { color:var(--pink); border-color:rgba(255,45,120,0.3); background:rgba(255,45,120,0.06); }
+.status.fork   { color:#a78bfa; border-color:rgba(167,139,250,0.3); background:rgba(167,139,250,0.06); }
+
+.status-dot { width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1.8s ease infinite; }
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.15;}}
+
+.card-desc {
+  font-size: 0.88rem;
+  color: rgba(184,207,224,0.6);
+  line-height: 1.6; margin-bottom: 16px;
+}
+
+.tag-row { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:16px; }
+
+.tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem; letter-spacing: 1px;
+  padding: 3px 8px; border-radius: 3px; border: 1px solid;
+  text-transform: uppercase;
+}
+.t-cy { color:var(--cyan);    border-color:rgba(0,255,231,0.25); background:rgba(0,255,231,0.06); }
+.t-pk { color:var(--pink);    border-color:rgba(255,45,120,0.25); background:rgba(255,45,120,0.06); }
+.t-gd { color:var(--gold);    border-color:rgba(255,215,0,0.25);  background:rgba(255,215,0,0.06); }
+.t-ms { color:var(--ms-b);    border-color:rgba(0,164,239,0.25);  background:rgba(0,164,239,0.06); }
+.t-az { color:var(--azure2);  border-color:rgba(0,120,212,0.25);  background:rgba(0,120,212,0.06); }
+.t-gg { color:var(--gg-y);    border-color:rgba(251,188,5,0.25);  background:rgba(251,188,5,0.06); }
+.t-gr { color:#4ade80;        border-color:rgba(74,222,128,0.25); background:rgba(74,222,128,0.06); }
+.t-vl { color:#a78bfa;        border-color:rgba(167,139,250,0.25);background:rgba(167,139,250,0.06); }
+
+/* metric row */
+.metric-row {
+  display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.metric {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.metric-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem; font-weight: 700;
+  color: var(--cyan);
+}
+.metric-key {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem; letter-spacing: 1.5px;
+  color: rgba(184,207,224,0.35); text-transform: uppercase;
+}
+
+/* progress bar */
+.prog-wrap { margin-bottom: 14px; }
+.prog-label {
+  display: flex; justify-content: space-between;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem; letter-spacing: 1.5px;
+  color: rgba(184,207,224,0.4); margin-bottom: 5px;
+}
+.prog-bar {
+  height: 3px; border-radius: 2px;
+  background: rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--pink));
+  box-shadow: 0 0 8px rgba(0,255,231,0.4);
+  animation: prog-anim 1.5s ease both;
+}
+@keyframes prog-anim { from{width:0!important;} }
+
+.card-links { display:flex; gap:10px; flex-wrap:wrap; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem; letter-spacing: 1.5px;
+  text-decoration: none; text-transform: uppercase;
+  border: 1px solid; transition: all .25s;
+}
+.btn-c { color:var(--cyan);  border-color:rgba(0,255,231,0.35);  background:rgba(0,255,231,0.05); }
+.btn-c:hover{ background:rgba(0,255,231,0.15); box-shadow:0 0 20px rgba(0,255,231,0.3); }
+.btn-p { color:var(--pink);  border-color:rgba(255,45,120,0.35); background:rgba(255,45,120,0.05); }
+.btn-p:hover{ background:rgba(255,45,120,0.15); box-shadow:0 0 20px rgba(255,45,120,0.3); }
+.btn-g { color:var(--gold);  border-color:rgba(255,215,0,0.35);  background:rgba(255,215,0,0.05); }
+.btn-g:hover{ background:rgba(255,215,0,0.15); box-shadow:0 0 20px rgba(255,215,0,0.3); }
+.btn-az{ color:var(--azure2);border-color:rgba(0,164,239,0.35);  background:rgba(0,164,239,0.05); }
+.btn-az:hover{background:rgba(0,164,239,0.15);box-shadow:0 0 20px rgba(0,164,239,0.3);}
+
+/* ═══ SKILLS SECTION */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px; margin-bottom: 64px;
+}
+.skill-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px;
+  backdrop-filter: blur(10px);
+  transition: border-color .3s;
+}
+.skill-card:hover { border-color: rgba(0,255,231,0.3); }
+.skill-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 2px;
+  color: rgba(184,207,224,0.5); text-transform: uppercase;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.skill-name span { font-size: 1rem; }
+
+/* ═══ ACHIEVEMENTS */
+.ach-row {
+  display: flex; flex-wrap: wrap; gap: 14px;
+  margin-bottom: 64px;
+}
+.ach-badge {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 14px 20px; border-radius: 8px;
+  backdrop-filter: blur(10px);
+  transition: all .3s;
+}
+.ach-badge:hover { border-color: var(--gold); box-shadow: var(--glow-g); transform: scale(1.02); }
+.ach-icon { font-size: 1.8rem; }
+.ach-info {}
+.ach-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem; font-weight: 700;
+  color: var(--gold); letter-spacing: 1px;
+}
+.ach-desc {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem; letter-spacing: 1px;
+  color: rgba(184,207,224,0.35); margin-top: 2px;
+}
+
+/* ═══ GITHUB ACCOUNTS */
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px; margin-bottom: 64px;
+}
+.account-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 6px; padding: 14px 18px;
+  display: flex; align-items: center; gap: 12px;
+  text-decoration: none;
+  transition: all .25s; backdrop-filter: blur(10px);
+}
+.account-card:hover { border-color: var(--cyan); transform: translateX(4px); box-shadow: var(--glow-c); }
+.account-icon {
+  width: 32px; height: 32px;
+  border: 1px solid rgba(0,255,231,0.25);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; flex-shrink: 0;
+  background: rgba(0,255,231,0.05);
+}
+.account-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.64rem; letter-spacing: 1px; color: var(--cyan);
+}
+.account-role {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 0.7rem; color: rgba(184,207,224,0.35);
+  margin-top: 1px;
+}
+
+/* ═══ CERTIFICATIONS */
+.cert-row {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 64px;
+}
+.cert-pill {
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  padding: 10px 18px; border-radius: 6px;
+  backdrop-filter: blur(8px);
+  transition: all .25s;
+}
+.cert-pill:hover { border-color: var(--gold); box-shadow: var(--glow-g); }
+.cert-icon { font-size: 1rem; }
+.cert-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem; letter-spacing: 1.5px;
+  color: rgba(184,207,224,0.55);
+}
+
+/* ═══ FOOTER */
+footer {
+  margin-top: 80px;
+  padding: 40px 0 30px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  position: relative;
+}
+footer::before {
+  content:'';
+  position: absolute; top:-1px; left:50%; transform:translateX(-50%);
+  width: 200px; height:1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+}
+.footer-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem; font-weight: 900;
+  color: var(--cyan); letter-spacing: 4px;
+  text-shadow: 0 0 20px rgba(0,255,231,0.5);
+  margin-bottom: 6px;
+}
+.footer-myanmar {
+  font-size: 1.1rem; color: rgba(0,255,231,0.4);
+  letter-spacing: 5px; margin-bottom: 4px;
+}
+.footer-role {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem; letter-spacing: 3px;
+  color: rgba(184,207,224,0.25); margin-bottom: 24px;
+}
+.footer-contact {
+  display: flex; justify-content: center; flex-wrap: wrap;
+  gap: 24px; margin-bottom: 20px;
+}
+.footer-contact a {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem; letter-spacing: 2px;
+  color: rgba(184,207,224,0.35); text-decoration:none;
+  transition: color .2s;
+}
+.footer-contact a:hover { color: var(--cyan); }
+.footer-copy {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem; letter-spacing: 2px;
+  color: rgba(184,207,224,0.15);
+}
+
+/* ═══ ANIMATIONS */
+.fade-in {
+  opacity: 0; transform: translateY(28px);
+  animation: fadeIn .6s ease both;
+}
+@keyframes fadeIn {
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* stagger delay helper classes */
+.d1{animation-delay:.05s} .d2{animation-delay:.10s} .d3{animation-delay:.15s}
+.d4{animation-delay:.20s} .d5{animation-delay:.25s} .d6{animation-delay:.30s}
+.d7{animation-delay:.35s} .d8{animation-delay:.40s} .d9{animation-delay:.45s}
+.d10{animation-delay:.50s}
+
+/* ═══ HOLOGRAPHIC SHIMMER */
+.shimmer {
+  position: relative; overflow: hidden;
+}
+.shimmer::after {
+  content:'';
+  position:absolute; inset:0;
+  background: linear-gradient(105deg,
+    transparent 40%, rgba(255,255,255,0.03) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: shimmer-pass 4s ease-in-out infinite;
+}
+@keyframes shimmer-pass {
+  0%{transform:translateX(-100%);}
+  60%,100%{transform:translateX(100%);}
+}
+
+/* ═══ DIVIDER */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 40px 0;
+}
+
+@media(max-width:640px){
+  .proj-grid,.proj-grid.featured,.skills-grid,.accounts-grid{grid-template-columns:1fr;}
+  .stats-banner{grid-template-columns:repeat(3,1fr);}
+  .hero-title{font-size:2rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- MATRIX CANVAS -->
+<canvas id="matrix-bg"></canvas>
+
+<!-- OVERLAYS -->
+<div class="grid-overlay"></div>
+<div class="scanlines"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">WPA · ULTRA PRO MAX</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+  <div class="loader-pct" id="loader-pct">INITIALIZING...</div>
+</div>
+
+<div class="page">
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="hero-orbit"></div>
+  <div class="hero-orbit"></div>
+  <div class="hero-orbit"></div>
+
+  <div class="corp-row fade-in">
+    <div class="corp-pill">
+      <div class="ms-logo"><span></span><span></span><span></span><span></span></div>
+      Microsoft
+    </div>
+    <span style="color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:1.2rem;">×</span>
+    <div class="corp-pill">
+      <div class="gg-logo"><span></span><span></span><span></span><span></span></div>
+      Google
+    </div>
+    <div class="corp-pill">⬡ Dev</div>
+  </div>
+
+  <div class="hero-eyebrow fade-in d1">WPA Collection · Ultra Pro Max · Full Package 2026</div>
+  <h1 class="hero-title fade-in d2">DEV·MOE<br>KYAWAUNG</h1>
+  <div class="hero-myanmar fade-in d3">မိုးကျော်အောင် · Senior Android Developer</div>
+  <div class="hero-sub fade-in d4">Tachileik, Myanmar · Microsoft Stack · Clean Architecture</div>
+
+  <div class="hero-cta-row fade-in d5">
+    <a href="https://github.com/Dev-moe-kyawaung" class="btn-cta btn-primary" target="_blank">⌥ GitHub Profile</a>
+    <a href="mailto:moekyawaung@asia.com" class="btn-cta btn-secondary">✉ Contact</a>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-arrow"></div>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<!-- ═══════════ STATS ═══════════ -->
+<div class="stats-banner fade-in">
+  <div class="stat-cell">
+    <span class="stat-num" data-count="22">0</span>
+    <span class="stat-lbl">Repositories</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-num" data-count="5">0</span>
+    <span class="stat-lbl">Years XP</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-num" data-count="14">0</span>
+    <span class="stat-lbl">GitHub Accounts</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-num" data-count="100">0</span>
+    <span class="stat-lbl">UI Components</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-num" data-count="87">0</span>
+    <span class="stat-lbl">% Test Coverage</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-num" data-count="60">0</span>
+    <span class="stat-lbl">% Faster Release</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-num" data-count="8">0</span>
+    <span class="stat-lbl">Languages</span>
+  </div>
+</div>
+
+<!-- ═══════════ FEATURED — AZURE ═══════════ -->
+<div class="sec-head">
+  <div class="sec-icon az">☁</div>
+  <div class="sec-label az">Microsoft Azure · Featured</div>
+  <div class="sec-line"></div>
+  <div class="sec-count">2 PROJECTS</div>
+</div>
+<div class="proj-grid featured">
+
+  <div class="card az featured-card shimmer fade-in d1">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">⚡</div>
+        <div>
+          <div class="card-title">PulseSync Azure</div>
+          <div class="card-corp az">Microsoft Azure · Senior Android</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">
+      Senior-level Android app demonstrating production Clean Architecture with full Microsoft Azure integration. MSAL auth, Microsoft Graph API, Azure OpenAI, Cosmos DB, SignalR real-time. Multi-module design with complete Azure DevOps CI/CD pipeline.
+    </div>
+    <div class="metric-row">
+      <div class="metric"><span class="metric-val">87%+</span><span class="metric-key">Jacoco Coverage</span></div>
+      <div class="metric"><span class="metric-val">Multi</span><span class="metric-key">Module</span></div>
+      <div class="metric"><span class="metric-val">Full</span><span class="metric-key">DevOps Pipeline</span></div>
+    </div>
+    <div class="tag-row">
+      <span class="tag t-az">Azure MSAL</span>
+      <span class="tag t-az">Graph API</span>
+      <span class="tag t-az">OpenAI</span>
+      <span class="tag t-az">Cosmos DB</span>
+      <span class="tag t-az">SignalR</span>
+      <span class="tag t-cy">Kotlin</span>
+      <span class="tag t-cy">Compose</span>
+      <span class="tag t-pk">CI/CD</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/Dev-moe-kyawaung/pulsesync-azure" class="btn btn-az" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+  <div class="card az shimmer fade-in d2">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🔄</div>
+        <div>
+          <div class="card-title">PulseSync Android</div>
+          <div class="card-corp az">Firebase · Real-time Platform</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">
+      Advanced multi-module Android application — real-time sync platform with Firebase backend, offline-first design, and full GitHub Actions CI/CD pipeline. Senior-level architecture showcase.
+    </div>
+    <div class="metric-row">
+      <div class="metric"><span class="metric-val">Offline</span><span class="metric-key">First Design</span></div>
+      <div class="metric"><span class="metric-val">Real-time</span><span class="metric-key">Firebase Sync</span></div>
+    </div>
+    <div class="tag-row">
+      <span class="tag t-gg">Firebase</span>
+      <span class="tag t-cy">Kotlin</span>
+      <span class="tag t-cy">Compose</span>
+      <span class="tag t-pk">Clean Arch</span>
+      <span class="tag t-ms">MVVM</span>
+      <span class="tag t-gr">Room DB</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/Dev-moe-kyawaung/pulsesync-android" class="btn btn-az" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ MICROSOFT PROJECTS ═══════════ -->
+<div class="sec-head">
+  <div class="sec-icon c">
+    <div class="ms-logo" style="width:14px;height:14px;"><span></span><span></span><span></span><span></span></div>
+  </div>
+  <div class="sec-label c">Microsoft · Stack Projects</div>
+  <div class="sec-line"></div>
+  <div class="sec-count">5 PROJECTS</div>
+</div>
+<div class="proj-grid">
+
+  <div class="card ms fade-in d1">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🌐</div>
+        <div>
+          <div class="card-title">MoekyawTranslator</div>
+          <div class="card-corp ms">Claude API · Android</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">Claude API–powered Android translation app. MVVM + Clean Architecture. 8 languages including Myanmar script, TTS, offline cache, streaming responses.</div>
+    <div class="tag-row">
+      <span class="tag t-cy">Claude API</span><span class="tag t-ms">Kotlin</span><span class="tag t-cy">Compose</span><span class="tag t-ms">MVVM</span><span class="tag t-gd">Myanmar</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-senior" class="btn btn-c" target="_blank">⌥ GitHub</a>
+      <a href="#" class="btn btn-p">▶ Demo</a>
+    </div>
+  </div>
+
+  <div class="card ms fade-in d2">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">⚙️</div>
+        <div>
+          <div class="card-title">Android CI/CD Suite</div>
+          <div class="card-corp ms">GitHub Actions · DevOps</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">5 production-ready GitHub Actions workflows: build, test, lint, release, dependency scanning. Automated APK signing + Play Store deployment. Cuts release time 60%+.</div>
+    <div class="tag-row">
+      <span class="tag t-cy">GitHub Actions</span><span class="tag t-ms">YAML</span><span class="tag t-ms">Gradle</span><span class="tag t-pk">CI/CD</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/Moe-kyaw-Aung-microsoft" class="btn btn-c" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+  <div class="card ms fade-in d3">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🎨</div>
+        <div>
+          <div class="card-title">Compose Design System</div>
+          <div class="card-corp ms">Android UI · Material 3</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">100+ production-ready Jetpack Compose components. Dark/light theming, cyberpunk design tokens, accessibility-ready, Material 3 compliant.</div>
+    <div class="tag-row">
+      <span class="tag t-cy">Jetpack Compose</span><span class="tag t-ms">Kotlin</span><span class="tag t-gd">Material 3</span><span class="tag t-pk">Design System</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-designer" class="btn btn-c" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+  <div class="card ms fade-in d4">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🏗️</div>
+        <div>
+          <div class="card-title">Architecture 3D Visualizer</div>
+          <div class="card-corp ms">Three.js · WebGL</div>
+        </div>
+      </div>
+      <div class="status beta"><span class="status-dot"></span>Beta</div>
+    </div>
+    <div class="card-desc">Android Clean Architecture layers rendered as interactive 3D nodes via Three.js. Real-time layer inspection powered by Claude API. Orbit controls, neon cyberpunk theme.</div>
+    <div class="tag-row">
+      <span class="tag t-cy">Three.js</span><span class="tag t-cy">Claude API</span><span class="tag t-gd">WebGL</span><span class="tag t-ms">Android</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-senior" class="btn btn-c" target="_blank">⌥ GitHub</a>
+      <a href="#" class="btn btn-p">▶ Live</a>
+    </div>
+  </div>
+
+  <div class="card ms fade-in d5">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">📱</div>
+        <div>
+          <div class="card-title">Android Senior Roadmap</div>
+          <div class="card-corp ms">Dev Education · Android</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Active</div>
+    </div>
+    <div class="card-desc">Comprehensive Android Senior Developer roadmap with app project implementations. Covers Kotlin, Jetpack, MVVM, MVI, multi-module, testing, and DevOps practices.</div>
+    <div class="tag-row">
+      <span class="tag t-ms">Kotlin</span><span class="tag t-cy">Android</span><span class="tag t-pk">Clean Arch</span><span class="tag t-gd">Roadmap</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/Dev-moe-kyawaung/Android-Senior-Developer-Roadmaps-and-App-project" class="btn btn-c" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ GOOGLE PROJECTS ═══════════ -->
+<div class="sec-head">
+  <div class="sec-icon p">
+    <div class="gg-logo"><span style="width:5px;height:5px;border-radius:50%;background:var(--gg-b);display:block;"></span><span style="width:5px;height:5px;border-radius:50%;background:var(--gg-r);display:block;"></span><span style="width:5px;height:5px;border-radius:50%;background:var(--gg-y);display:block;"></span></div>
+  </div>
+  <div class="sec-label p">Google · Stack Projects</div>
+  <div class="sec-line"></div>
+  <div class="sec-count">4 PROJECTS</div>
+</div>
+<div class="proj-grid">
+
+  <div class="card gg fade-in d1">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🔥</div>
+        <div>
+          <div class="card-title">Firebase Backend Suite</div>
+          <div class="card-corp gg">Google Firebase</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">Realtime Database, Firestore, Auth, Cloud Functions, FCM push notifications. Offline persistence, Crashlytics, Performance Monitoring. Modular SDK integration.</div>
+    <div class="tag-row">
+      <span class="tag t-gg">Firebase</span><span class="tag t-cy">Kotlin</span><span class="tag t-gg">Firestore</span><span class="tag t-cy">FCM</span><span class="tag t-gr">Crashlytics</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-senior" class="btn btn-p" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+  <div class="card gg fade-in d2">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🤖</div>
+        <div>
+          <div class="card-title">Gemini Translator Web</div>
+          <div class="card-corp gg">Google AI Studio · React</div>
+        </div>
+      </div>
+      <div class="status beta"><span class="status-dot"></span>Beta</div>
+    </div>
+    <div class="card-desc">Original web-based bilingual translator (React + Gemini API). Predecessor to native MoekyawTranslator. Myanmar ⇄ Multi-language real-time translation with streaming.</div>
+    <div class="tag-row">
+      <span class="tag t-gg">Gemini API</span><span class="tag t-cy">React</span><span class="tag t-gd">Myanmar</span><span class="tag t-pk">NLP</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-webdevoper" class="btn btn-p" target="_blank">⌥ GitHub</a>
+      <a href="#" class="btn btn-g">▶ Demo</a>
+    </div>
+  </div>
+
+  <div class="card gg fade-in d3">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🗺️</div>
+        <div>
+          <div class="card-title">Maps & Location SDK</div>
+          <div class="card-corp gg">Google Maps Platform</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">Google Maps SDK with custom overlays, Places API autocomplete, Directions API routing. Compose-native map composables, geofencing, real-time tracking.</div>
+    <div class="tag-row">
+      <span class="tag t-gg">Maps SDK</span><span class="tag t-gg">Places API</span><span class="tag t-cy">Compose</span><span class="tag t-gd">Location</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-senior" class="btn btn-p" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+  <div class="card gg fade-in d4">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🧩</div>
+        <div>
+          <div class="card-title">Play Store CI Pipeline</div>
+          <div class="card-corp gg">Google Play · Fastlane</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">Automated internal/alpha/production track releases via Fastlane + Google Play API. Version bump, changelog generation, APK signing, screenshot upload automation.</div>
+    <div class="tag-row">
+      <span class="tag t-gg">Play Store</span><span class="tag t-cy">Fastlane</span><span class="tag t-pk">CI/CD</span><span class="tag t-ms">Gradle</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/Moe-kyaw-Aung-microsoft" class="btn btn-p" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ OPEN SOURCE / COMMUNITY ═══════════ -->
+<div class="sec-head">
+  <div class="sec-icon g">✦</div>
+  <div class="sec-label g">Open Source · Community</div>
+  <div class="sec-line"></div>
+  <div class="sec-count">5 PROJECTS</div>
+</div>
+<div class="proj-grid">
+
+  <div class="card os fade-in d1">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">📦</div>
+        <div>
+          <div class="card-title">Acode Editor Plugin</div>
+          <div class="card-corp os">acode.devx.env · v2.0.42</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">13 custom themes for Acode Android editor including cyberpunk neon variants. Syntax highlighting, auto-indent, terminal integration. Published on Acode marketplace.</div>
+    <div class="tag-row">
+      <span class="tag t-cy">Acode</span><span class="tag t-gd">13 Themes</span><span class="tag t-pk">Plugin</span><span class="tag t-ms">JavaScript</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-senior" class="btn btn-g" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+  <div class="card os fade-in d2">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🇹🇭</div>
+        <div>
+          <div class="card-title">Thailand Resources Hub</div>
+          <div class="card-corp os">Community · Myanmar Workers</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">Community repository for Myanmar workers in Thailand. Legal guides, job boards, emergency contacts, translation tools. Bilingual Myanmar/Thai/English with active community contributions.</div>
+    <div class="tag-row">
+      <span class="tag t-gd">Myanmar</span><span class="tag t-cy">Community</span><span class="tag t-gg">Thailand</span><span class="tag t-pk">Resources</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-senior" class="btn btn-g" target="_blank">⌥ GitHub</a>
+      <a href="#" class="btn btn-c">▶ Site</a>
+    </div>
+  </div>
+
+  <div class="card os fade-in d3">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🌐</div>
+        <div>
+          <div class="card-title">Portfolio v3 · GitHub Pages</div>
+          <div class="card-corp os">Dev-moe-kyawaung · GitHub Pages</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">Production portfolio site deployed to GitHub Pages. HTML/CSS/JS with cyberpunk dark aesthetic, bilingual Myanmar/English content, animated sections, and project showcase.</div>
+    <div class="tag-row">
+      <span class="tag t-cy">GitHub Pages</span><span class="tag t-ms">HTML</span><span class="tag t-pk">Cyberpunk</span><span class="tag t-gd">Myanmar</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/Dev-moe-kyawaung/Dev-moe-kyawaung.github.io" class="btn btn-g" target="_blank">⌥ GitHub</a>
+      <a href="https://dev-moe-kyawaung.github.io" class="btn btn-c" target="_blank">▶ Visit</a>
+    </div>
+  </div>
+
+  <div class="card os fade-in d4">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🔧</div>
+        <div>
+          <div class="card-title">gitignore.io (Fork)</div>
+          <div class="card-corp os">toptal · Swift · Dev Tool</div>
+        </div>
+      </div>
+      <div class="status fork"><span class="status-dot"></span>Fork</div>
+    </div>
+    <div class="card-desc">Forked from toptal/gitignore.io. Create useful .gitignore files for any project type. Extended with Android, Kotlin, Compose, and Myanmar dev environment templates.</div>
+    <div class="tag-row">
+      <span class="tag t-vl">Swift</span><span class="tag t-cy">Dev Tool</span><span class="tag t-ms">Android</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/Dev-moe-kyawaung/gitignore.io" class="btn btn-g" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+  <div class="card os fade-in d5">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🤖</div>
+        <div>
+          <div class="card-title">GitHub MCP Server (Fork)</div>
+          <div class="card-corp os">GitHub Official · Go</div>
+        </div>
+      </div>
+      <div class="status fork"><span class="status-dot"></span>Fork</div>
+    </div>
+    <div class="card-desc">Fork of GitHub's official MCP (Model Context Protocol) server. Enables LLM integration with GitHub repositories, issues, PRs, and code search via AI agents.</div>
+    <div class="tag-row">
+      <span class="tag t-vl">Go</span><span class="tag t-cy">MCP</span><span class="tag t-az">GitHub API</span><span class="tag t-gd">AI Integration</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/Dev-moe-kyawaung/github-mcp-server" class="btn btn-g" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ DEV CREATIVE ═══════════ -->
+<div class="sec-head">
+  <div class="sec-icon c">🔮</div>
+  <div class="sec-label c">Dev Creative · Experiments</div>
+  <div class="sec-line"></div>
+  <div class="sec-count">4 BUILDS</div>
+</div>
+<div class="proj-grid">
+
+  <div class="card dev fade-in d1">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🎵</div>
+        <div>
+          <div class="card-title">Audio-Reactive Visualizer</div>
+          <div class="card-corp dev">Web Audio API · Myanmar</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">Cyberpunk audio visualizer using Web Audio API. Myanmar pentatonic scale demo, BPM detection, frequency bars with neon glow. Real-time canvas rendering.</div>
+    <div class="tag-row">
+      <span class="tag t-cy">Web Audio API</span><span class="tag t-pk">Canvas</span><span class="tag t-gd">Myanmar</span><span class="tag t-ms">JavaScript</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-senior" class="btn btn-c" target="_blank">⌥ GitHub</a>
+      <a href="#" class="btn btn-p">▶ Run</a>
+    </div>
+  </div>
+
+  <div class="card dev fade-in d2">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🌧️</div>
+        <div>
+          <div class="card-title">Matrix Binary Rain</div>
+          <div class="card-corp dev">Canvas · Burmese Script</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">Matrix-style ASCII binary rain featuring Burmese script characters and glitch effects. Configurable density, speed, glow intensity, and character set.</div>
+    <div class="tag-row">
+      <span class="tag t-cy">Canvas</span><span class="tag t-pk">Glitch FX</span><span class="tag t-gd">Myanmar</span><span class="tag t-ms">JavaScript</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-senior" class="btn btn-c" target="_blank">⌥ GitHub</a>
+      <a href="#" class="btn btn-p">▶ Run</a>
+    </div>
+  </div>
+
+  <div class="card dev fade-in d3">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🕐</div>
+        <div>
+          <div class="card-title">Cyberpunk Bilingual Clock</div>
+          <div class="card-corp dev">Web · Myanmar / English</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">Real-time rhyming clock with Myanmar/English bilingual output, cyberpunk neon aesthetic, animated digits, and Bagan temple motif decorative elements.</div>
+    <div class="tag-row">
+      <span class="tag t-cy">HTML/CSS/JS</span><span class="tag t-gd">Myanmar</span><span class="tag t-pk">Neon</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-senior" class="btn btn-c" target="_blank">⌥ GitHub</a>
+      <a href="#" class="btn btn-p">▶ Run</a>
+    </div>
+  </div>
+
+  <div class="card dev fade-in d4">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-emoji">🎮</div>
+        <div>
+          <div class="card-title">Yahtzee · Compose</div>
+          <div class="card-corp dev">Jetpack Compose · Cyberpunk</div>
+        </div>
+      </div>
+      <div class="status live"><span class="status-dot"></span>Live</div>
+    </div>
+    <div class="card-desc">Full Yahtzee dice game built in Jetpack Compose with cyberpunk dark palette, animated dice rolling, score tracking, and clean MVVM architecture.</div>
+    <div class="tag-row">
+      <span class="tag t-cy">Jetpack Compose</span><span class="tag t-pk">Cyberpunk</span><span class="tag t-ms">Kotlin</span><span class="tag t-gd">Game</span>
+    </div>
+    <div class="card-links">
+      <a href="https://github.com/moekyawaung-senior" class="btn btn-c" target="_blank">⌥ GitHub</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ SKILLS ═══════════ -->
+<div class="sec-head">
+  <div class="sec-icon az">◈</div>
+  <div class="sec-label az">Core Skills · Proficiency</div>
+  <div class="sec-line"></div>
+</div>
+<div class="skills-grid">
+
+  <div class="skill-card fade-in d1">
+    <div class="skill-name"><span>📱</span> Android · Kotlin</div>
+    <div class="prog-wrap"><div class="prog-label"><span>Kotlin</span><span>98%</span></div><div class="prog-bar"><div class="prog-fill" style="width:98%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>Jetpack Compose</span><span>95%</span></div><div class="prog-bar"><div class="prog-fill" style="width:95%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>Room / DataStore</span><span>92%</span></div><div class="prog-bar"><div class="prog-fill" style="width:92%"></div></div></div>
+  </div>
+
+  <div class="skill-card fade-in d2">
+    <div class="skill-name"><span>🏗️</span> Architecture</div>
+    <div class="prog-wrap"><div class="prog-label"><span>Clean Architecture</span><span>97%</span></div><div class="prog-bar"><div class="prog-fill" style="width:97%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>MVVM / MVI</span><span>95%</span></div><div class="prog-bar"><div class="prog-fill" style="width:95%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>Multi-Module</span><span>90%</span></div><div class="prog-bar"><div class="prog-fill" style="width:90%"></div></div></div>
+  </div>
+
+  <div class="skill-card fade-in d3">
+    <div class="skill-name"><span>☁️</span> Cloud · Backend</div>
+    <div class="prog-wrap"><div class="prog-label"><span>Firebase Suite</span><span>94%</span></div><div class="prog-bar"><div class="prog-fill" style="width:94%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>Microsoft Azure</span><span>88%</span></div><div class="prog-bar"><div class="prog-fill" style="width:88%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>REST / Retrofit</span><span>96%</span></div><div class="prog-bar"><div class="prog-fill" style="width:96%"></div></div></div>
+  </div>
+
+  <div class="skill-card fade-in d4">
+    <div class="skill-name"><span>⚙️</span> DevOps · CI/CD</div>
+    <div class="prog-wrap"><div class="prog-label"><span>GitHub Actions</span><span>93%</span></div><div class="prog-bar"><div class="prog-fill" style="width:93%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>Azure DevOps</span><span>87%</span></div><div class="prog-bar"><div class="prog-fill" style="width:87%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>Fastlane</span><span>85%</span></div><div class="prog-bar"><div class="prog-fill" style="width:85%"></div></div></div>
+  </div>
+
+  <div class="skill-card fade-in d5">
+    <div class="skill-name"><span>🧪</span> Testing</div>
+    <div class="prog-wrap"><div class="prog-label"><span>JUnit / MockK</span><span>91%</span></div><div class="prog-bar"><div class="prog-fill" style="width:91%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>Espresso / UI Tests</span><span>86%</span></div><div class="prog-bar"><div class="prog-fill" style="width:86%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>Jacoco Coverage</span><span>87%</span></div><div class="prog-bar"><div class="prog-fill" style="width:87%"></div></div></div>
+  </div>
+
+  <div class="skill-card fade-in d6">
+    <div class="skill-name"><span>🤖</span> AI · Integration</div>
+    <div class="prog-wrap"><div class="prog-label"><span>Claude API</span><span>92%</span></div><div class="prog-bar"><div class="prog-fill" style="width:92%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>Azure OpenAI</span><span>85%</span></div><div class="prog-bar"><div class="prog-fill" style="width:85%"></div></div></div>
+    <div class="prog-wrap"><div class="prog-label"><span>Gemini API</span><span>82%</span></div><div class="prog-bar"><div class="prog-fill" style="width:82%"></div></div></div>
+  </div>
+
+</div>
+
+<!-- ═══════════ ACHIEVEMENTS ═══════════ -->
+<div class="sec-head">
+  <div class="sec-icon g">🏆</div>
+  <div class="sec-label g">GitHub Achievements</div>
+  <div class="sec-line"></div>
+</div>
+<div class="ach-row">
+  <div class="ach-badge fade-in d1">
+    <div class="ach-icon">⚡</div>
+    <div class="ach-info">
+      <div class="ach-title">QUICKDRAW</div>
+      <div class="ach-desc">Closed issue/PR within 5 min</div>
+    </div>
+  </div>
+  <div class="ach-badge fade-in d2">
+    <div class="ach-icon">🎲</div>
+    <div class="ach-info">
+      <div class="ach-title">YOLO</div>
+      <div class="ach-desc">Merged PR without review</div>
+    </div>
+  </div>
+  <div class="ach-badge fade-in d3">
+    <div class="ach-icon">🦈</div>
+    <div class="ach-info">
+      <div class="ach-title">PULL SHARK</div>
+      <div class="ach-desc">Multiple merged pull requests</div>
+    </div>
+  </div>
+  <div class="ach-badge fade-in d4">
+    <div class="ach-icon">🧠</div>
+    <div class="ach-info">
+      <div class="ach-title">GALAXY BRAIN</div>
+      <div class="ach-desc">Accepted community answer</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CERTIFICATIONS ═══════════ -->
+<div class="sec-head">
+  <div class="sec-icon c">🎓</div>
+  <div class="sec-label c">Certifications · Education</div>
+  <div class="sec-line"></div>
+</div>
+<div class="cert-row">
+  <div class="cert-pill fade-in d1"><span class="cert-icon">☕</span><span class="cert-text">Programming Hub · Java</span></div>
+  <div class="cert-pill fade-in d2"><span class="cert-icon">🎯</span><span class="cert-text">Programming Hub · Kotlin</span></div>
+  <div class="cert-pill fade-in d3"><span class="cert-icon">📱</span><span class="cert-text">Programming Hub · Android</span></div>
+  <div class="cert-pill fade-in d4"><span class="cert-icon">🧮</span><span class="cert-text">Programming Hub · DSA</span></div>
+  <div class="cert-pill fade-in d5"><span class="cert-icon">🔥</span><span class="cert-text">Firebase Associate Developer</span></div>
+  <div class="cert-pill fade-in d6"><span class="cert-icon">🐙</span><span class="cert-text">Git & GitHub Professional</span></div>
+  <div class="cert-pill fade-in d7"><span class="cert-icon">🎓</span><span class="cert-text">BSc Computer Science · UCS Pathein</span></div>
+  <div class="cert-pill fade-in d8"><span class="cert-icon">📚</span><span class="cert-text">BA English · Pathein Distance Uni</span></div>
+</div>
+
+<!-- ═══════════ GITHUB ACCOUNTS ═══════════ -->
+<div class="sec-head">
+  <div class="sec-icon az">⬡</div>
+  <div class="sec-label az">GitHub Accounts · Network</div>
+  <div class="sec-line"></div>
+  <div class="sec-count">14+ ACCOUNTS</div>
+</div>
+<div class="accounts-grid">
+  <a href="https://github.com/Dev-moe-kyawaung" class="account-card fade-in d1" target="_blank">
+    <div class="account-icon">💻</div>
+    <div><div class="account-name">Dev-moe-kyawaung</div><div class="account-role">Primary Dev Account</div></div>
+  </a>
+  <a href="https://github.com/moekyawaung-senior" class="account-card fade-in d2" target="_blank">
+    <div class="account-icon">⭐</div>
+    <div><div class="account-name">moekyawaung-senior</div><div class="account-role">Senior Projects</div></div>
+  </a>
+  <a href="https://github.com/Moe-kyaw-Aung-microsoft" class="account-card fade-in d3" target="_blank">
+    <div class="account-icon">🪟</div>
+    <div><div class="account-name">Moe-kyaw-Aung-microsoft</div><div class="account-role">Microsoft Stack</div></div>
+  </a>
+  <a href="https://github.com/moekyawaung-webdevoper" class="account-card fade-in d4" target="_blank">
+    <div class="account-icon">🌐</div>
+    <div><div class="account-name">moekyawaung-webdevoper</div><div class="account-role">Web Development</div></div>
+  </a>
+  <a href="https://github.com/Moekyawaung2026" class="account-card fade-in d5" target="_blank">
+    <div class="account-icon">🚀</div>
+    <div><div class="account-name">Moekyawaung2026</div><div class="account-role">2026 Portfolio</div></div>
+  </a>
+  <a href="https://github.com/moekyawaung-china" class="account-card fade-in d6" target="_blank">
+    <div class="account-icon">🇨🇳</div>
+    <div><div class="account-name">moekyawaung-china</div><div class="account-role">China Region</div></div>
+  </a>
+  <a href="https://github.com/moekyawaung-hack" class="account-card fade-in d7" target="_blank">
+    <div class="account-icon">⚡</div>
+    <div><div class="account-name">moekyawaung-hack</div><div class="account-role">Hackathon</div></div>
+  </a>
+  <a href="https://github.com/moekyawaung-designer" class="account-card fade-in d8" target="_blank">
+    <div class="account-icon">🎨</div>
+    <div><div class="account-name">moekyawaung-designer</div><div class="account-role">Design System</div></div>
+  </a>
+</div>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <div class="footer-name">MOE KYAW AUNG</div>
+  <div class="footer-myanmar">မိုးကျော်အောင်</div>
+  <div class="footer-role">Senior Android Developer · Microsoft · Tachileik, Myanmar</div>
+  <div class="footer-contact">
+    <a href="mailto:moekyawaung@asia.com">✉ moekyawaung@asia.com</a>
+    <a href="tel:+959889000889">📱 +95 988 9000 889</a>
+    <a href="https://github.com/Dev-moe-kyawaung" target="_blank">⌥ GitHub</a>
+    <a href="https://dev-moe-kyawaung.github.io" target="_blank">🌐 Portfolio</a>
+  </div>
+  <div class="footer-copy">© 2026 Moe Kyaw Aung · WPA Collection Ultra Pro Max · Full Package · v2.0</div>
+</footer>
+
+</div><!-- end .page -->
+
+<script>
+/* ── CURSOR */
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+});
+function animRing(){
+  rx += (mx-rx)*.12; ry += (my-ry)*.12;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,.card,.btn-cta,.corp-pill').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ ring.style.transform='translate(-50%,-50%) scale(1.8)'; ring.style.borderColor='rgba(0,255,231,0.8)'; });
+  el.addEventListener('mouseleave',()=>{ ring.style.transform='translate(-50%,-50%) scale(1)'; ring.style.borderColor='rgba(0,255,231,0.5)'; });
+});
+
+/* ── MATRIX RAIN */
+const canvas=document.getElementById('matrix-bg');
+const ctx=canvas.getContext('2d');
+let W,H,cols,drops=[];
+const CHARS='アイウエオカキクケコサシスセソタチツテトナニヌネノABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890ကခဂဃငစဆဇဈဉညဋဌဍဎဏတထဒဓနပဖဗဘမယရလဝသဟဠအ';
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; cols=Math.floor(W/18); drops=Array(cols).fill(1); }
+resize(); window.addEventListener('resize',resize);
+setInterval(()=>{
+  ctx.fillStyle='rgba(2,5,9,0.04)'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#00ffe7'; ctx.font='14px Share Tech Mono';
+  drops.forEach((y,i)=>{
+    ctx.fillText(CHARS[Math.floor(Math.random()*CHARS.length)],i*18,y*18);
+    if(y*18>H&&Math.random()>0.975) drops[i]=0;
+    drops[i]++;
+  });
+},50);
+
+/* ── LOADER */
+let pct=0;
+const pctEl=document.getElementById('loader-pct');
+const msgs=['INITIALIZING...','LOADING ASSETS...','COMPILING SHADERS...','BOOTING SYSTEM...','READY'];
+const iv=setInterval(()=>{
+  pct+=Math.random()*8+2;
+  if(pct>100)pct=100;
+  pctEl.textContent=msgs[Math.min(Math.floor(pct/25),4)]+' '+Math.floor(pct)+'%';
+  if(pct>=100){
+    clearInterval(iv);
+    setTimeout(()=>document.getElementById('loader').classList.add('hidden'),300);
+  }
+},80);
+
+/* ── COUNTER ANIMATION */
+function animCount(el){
+  const target=+el.dataset.count;
+  let v=0; const step=target/60;
+  const t=setInterval(()=>{
+    v=Math.min(v+step,target);
+    el.textContent=Math.floor(v)+(el.dataset.suffix||'');
+    if(v>=target) clearInterval(t);
+  },20);
+}
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('[data-count]').forEach(animCount);
+      observer.unobserve(e.target);
+    }
+  });
+},{threshold:0.3});
+document.querySelectorAll('.stats-banner').forEach(el=>observer.observe(el));
+
+/* ── 3D CARD TILT */
+document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-0.5;
+    const y=(e.clientY-r.top)/r.height-0.5;
+    card.style.transform=`translateY(-6px) rotateY(${x*6}deg) rotateX(${-y*4}deg)`;
+  });
+  card.addEventListener('mouseleave',()=>{
+    card.style.transform='';
+  });
+});
+</script>
+</body>
+</html>
